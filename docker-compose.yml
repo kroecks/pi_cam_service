@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  api:
+    build: ./app
+    # or use an off‑the‑shelf Python image:
+    # image: python:3.11-slim
+    # volumes: ["./app:/app"]
+    working_dir: /app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    devices: ["/dev/video0:/dev/video0", "/dev/video1:/dev/video1"]  # map more as needed
+    network_mode: host   # simplest; exposes 8000 & 8554 directly
+    restart: unless-stopped
+
+  mediamtx:
+    image: bluenviron/mediamtx:latest  # successor of rtsp-simple-server
+    network_mode: host
+    restart: unless-stopped
