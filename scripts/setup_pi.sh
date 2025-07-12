@@ -17,17 +17,17 @@ fi
 # 3. Clone repo under /opt and bring it up
 sudo mkdir -p /opt && sudo chown "$USER" /opt
 cd /opt
-if [ ! -d pi-cam-service ]; then
-  git clone https://github.com/kroecks/pi-cam-service.git
+if [ ! -d pi_cam_service ]; then
+  git clone https://github.com/kroecks/pi_cam_service.git
 fi
-cd pi-cam-service
+cd pi_cam_service
 
 docker compose pull
 docker compose up -d
 
 # 4. Enable systemd unit so stack survives reboot
-sudo cp systemd/pi-cam-service.service /etc/systemd/system/
+sudo cp systemd/pi_cam_service.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable pi-cam-service.service
+sudo systemctl enable pi_cam_service.service
 
 echo "✔ Setup complete. Reboot recommended so new groups & camera goodies take effect."
