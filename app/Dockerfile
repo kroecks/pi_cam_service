@@ -10,6 +10,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pkg-config \
         libssl-dev \
         libcap-dev \
+        libcamera-dev \
+        python3-libcamera \
+        python3-kms++ \
+        python3-pyqt5 \
+        python3-prctl \
+        libatlas-base-dev \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 

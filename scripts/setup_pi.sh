@@ -47,7 +47,120 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r app/requirements.txt
 
-# 6. Start MediaMTX with Docker
+# 6. Create MediaMTX config and start with Docker
+echo "🎥 Setting up MediaMTX config..."
+cat > mediamtx.yml << 'EOF'
+# MediaMTX configuration for Pi Camera Service
+
+# General settings
+logLevel: info
+logDestinations: [stdout]
+logFile: ""
+
+# API settings
+api: yes
+apiAddress: :9997
+
+# Metrics
+metrics: yes
+metricsAddress: :9998
+
+# Playback server (for recorded streams)
+playback: yes
+playbackAddress: :9996
+
+# RTSP settings
+rtspAddress: :8554
+rtspEncryption: no
+rtspServerKey: server.key
+rtspServerCert: server.crt
+rtspAuthMethods: [basic, digest]
+
+# RTMP settings
+rtmpAddress: :1935
+rtmpEncryption: no
+rtmpServerKey: server.key
+rtmpServerCert: server.crt
+
+# HLS settings
+hlsAddress: :8888
+hlsEncryption: no
+hlsServerKey: server.key
+hlsServerCert: server.crt
+hlsAlwaysRemux: no
+hlsVariant: lowLatency
+hlsSegmentCount: 7
+hlsSegmentDuration: 1s
+hlsPartDuration: 200ms
+hlsSegmentMaxSize: 50M
+hlsAllowOrigin: "*"
+hlsTrustedProxies: []
+hlsDirectory: ""
+
+# WebRTC settings
+webrtcAddress: :8889
+webrtcEncryption: no
+webrtcServerKey: server.key
+webrtcServerCert: server.crt
+webrtcAllowOrigin: "*"
+webrtcTrustedProxies: []
+webrtcICEServers2: []
+
+# SRT settings
+srtAddress: :8890
+srtEncryption: no
+
+# Recording settings
+recordPath: ./recordings/%path/%Y-%m-%d_%H-%M-%S-%f
+recordFormat: fmp4
+recordPartDuration: 1s
+recordSegmentDuration: 1h
+recordDeleteAfter: 24h
+
+# Default path settings (for any stream)
+pathDefaults:
+  source: publisher
+  sourceFingerprint: ""
+  sourceOnDemand: no
+  sourceOnDemandStartTimeout: 10s
+  sourceOnDemandCloseAfter: 10s
+  sourceRedirect: ""
+  disablePublisherOverride: no
+  fallback: ""
+  publishUser: ""
+  publishPass: ""
+  publishIPs: []
+  readUser: ""
+  readPass: ""
+  readIPs: []
+  record: no
+  playback: no
+  runOnInit: ""
+  runOnInitRestart: no
+  runOnDemand: ""
+  runOnDemandRestart: no
+  runOnDemandStartTimeout: 10s
+  runOnDemandCloseAfter: 10s
+  runOnUnDemand: ""
+  runOnReady: ""
+  runOnNotReady: ""
+  runOnRead: ""
+  runOnUnread: ""
+  runOnRecordSegmentCreate: ""
+  runOnRecordSegmentComplete: ""
+
+# Path-specific settings
+paths:
+  camera:
+    source: publisher
+  camera0:
+    source: publisher
+  camera1:
+    source: publisher
+  test:
+    source: publisher
+EOF
+
 echo "🎥 Starting MediaMTX..."
 docker compose up -d mediamtx
 
