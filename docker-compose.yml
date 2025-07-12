@@ -4,10 +4,16 @@ services:
     devices:
       - "/dev/video0:/dev/video0"
       - "/dev/video1:/dev/video1"
+      - "/dev/vchiq:/dev/vchiq"
+      - "/dev/vcsm-cma:/dev/vcsm-cma"
     network_mode: host
     restart: unless-stopped
+    depends_on:
+      - mediamtx
 
   mediamtx:
-    image: bluenviron/mediamtx:latest  # successor of rtsp-simple-server
+    image: bluenviron/mediamtx:latest
     network_mode: host
     restart: unless-stopped
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml
