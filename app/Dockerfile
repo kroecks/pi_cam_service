@@ -5,12 +5,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 # --- system packages -------------------------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ffmpeg \
-        # Alternative: use v4l-utils for camera access
         v4l-utils \
-        # Build tools if we need to compile libcamera
         build-essential \
         pkg-config \
         libssl-dev \
+        libcap-dev \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 

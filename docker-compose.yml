@@ -1,19 +1,34 @@
 services:
-  api:
-    build: ./app
+  pi-camera-api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
     devices:
       - "/dev/video0:/dev/video0"
       - "/dev/video1:/dev/video1"
-      - "/dev/vchiq:/dev/vchiq"
-      - "/dev/vcsm-cma:/dev/vcsm-cma"
-    network_mode: host
+
+    environment:
+      - PYTHONUNBUFFERED=1
+    privileged: true
     restart: unless-stopped
-    depends_on:
-      - mediamtx
+    networks:
+      - camera-network
 
   mediamtx:
     image: bluenviron/mediamtx:latest
-    network_mode: host
-    restart: unless-stopped
+    ports:
+      - "8554:8554"  # RTSP
+      - "1935:1935"  # RTMP
+      - "8888:8888"  # HLS
+      - "9997:9997"  # Web UI
     volumes:
       - ./mediamtx.yml:/mediamtx.yml
+    restart: unless-stopped
+    networks:
+      - camera-network
+
+networks:
+  camera-network:
+    driver: bridge

@@ -6,7 +6,7 @@ echo "🚀 Starting Pi Camera Service setup..."
 # 1. System prep
 echo "📦 Updating system packages..."
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git libcamera-apps ffmpeg v4l-utils
+sudo apt install -y git libcamera-apps ffmpeg v4l-utils python3-pip python3-venv libcap-dev
 
 # 2. Camera setup
 echo "📹 Configuring camera..."
@@ -18,7 +18,7 @@ fi
 # Add user to video group
 sudo usermod -aG video "$USER"
 
-# 3. Docker (skip if already present)
+# 3. Docker (for MediaMTX only)
 echo "🐳 Setting up Docker..."
 if ! command -v docker &>/dev/null; then
     curl -fsSL https://get.docker.com | sh
@@ -28,7 +28,7 @@ if ! command -v docker compose &>/dev/null; then
     sudo apt install -y docker-compose-plugin
 fi
 
-# 4. Clone or pull latest repo into /opt
+# 4. Clone or pull latest repo
 echo "📁 Setting up application..."
 sudo mkdir -p /opt && sudo chown "$USER" /opt
 cd /opt
@@ -40,28 +40,38 @@ else
     cd pi_cam_service
 fi
 
-# 5. Build & start stack
-echo "🏗️ Building container images…"
-docker compose build
+# 5. Setup Python virtual environment
+echo "🐍 Setting up Python environment..."
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r app/requirements.txt
 
-echo "🚀 Starting services..."
-docker compose up -d
+# 6. Start MediaMTX with Docker
+echo "🎥 Starting MediaMTX..."
+docker compose up -d mediamtx
 
-# 6. Wait for services to be ready
-echo "⏳ Waiting for services to start..."
-sleep 10
-
-# Check if services are running
-if docker compose ps | grep -q "Up"; then
-    echo "✅ Services are running"
-else
-    echo "❌ Some services may not be running properly"
-    docker compose logs
-fi
-
-# 7. Enable systemd service
+# 7. Setup systemd service for FastAPI
 echo "🔧 Setting up systemd service..."
-sudo cp systemd/pi_cam_service.service /etc/systemd/system/
+cat > /tmp/pi_cam_service.service << EOF
+[Unit]
+Description=Pi Camera RTSP Service
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=/opt/pi_cam_service
+Environment=PATH=/opt/pi_cam_service/venv/bin
+ExecStart=/opt/pi_cam_service/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --app-dir /opt/pi_cam_service/app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo mv /tmp/pi_cam_service.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable pi_cam_service.service
 
@@ -70,7 +80,6 @@ echo "🔍 Checking camera devices..."
 for i in {0..1}; do
     if [ -e "/dev/video$i" ]; then
         echo "✅ Found camera device: /dev/video$i"
-        # Test camera briefly
         if timeout 3 v4l2-ctl --device=/dev/video$i --list-formats-ext > /dev/null 2>&1; then
             echo "   📹 Camera $i is responsive"
         else
@@ -86,9 +95,10 @@ echo "🎉 Setup complete!"
 echo ""
 echo "📋 Next steps:"
 echo "1. Reboot your Pi: sudo reboot"
-echo "2. Test the API: curl http://localhost:8000/cameras"
-echo "3. Start a stream: curl -X POST http://localhost:8000/stream/start/camera0"
-echo "4. View stream: rtsp://your-pi-ip:8554/camera"
+echo "2. Start the service: sudo systemctl start pi_cam_service"
+echo "3. Test the API: curl http://localhost:8000/cameras"
+echo "4. Start a stream: curl -X POST http://localhost:8000/stream/start/camera0"
+echo "5. View stream: rtsp://your-pi-ip:8554/camera"
 echo ""
 echo "🌐 Web interfaces:"
 echo "- API: http://localhost:8000/docs"
