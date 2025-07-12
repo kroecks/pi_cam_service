@@ -1,5 +1,6 @@
 fastapi
 uvicorn
 picamera2
+libcamera
 numpy
 opencv-python
