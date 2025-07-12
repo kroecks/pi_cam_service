@@ -1,27 +1,18 @@
-FROM python:3.11-slim
+FROM balenalib/raspberry-pi-debian:bullseye
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# --- system packages -------------------------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+        python3-picamera2 \
         ffmpeg \
         v4l-utils \
-        build-essential \
-        pkg-config \
-        libssl-dev \
-        libcap-dev \
-        libcamera-dev \
-        python3-libcamera \
-        python3-kms++ \
-        python3-pyqt5 \
-        python3-prctl \
-        libatlas-base-dev \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# --- python app ------------------------------------------------------
 WORKDIR /app
 COPY . /app
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python3", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
