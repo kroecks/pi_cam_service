@@ -22,10 +22,15 @@ if [ ! -d pi_cam_service ]; then
 fi
 cd pi_cam_service
 
+echo "Begin pull..."
+
 docker compose pull
+
+echo "Begin Docker compose..."
 docker compose up -d
 
 # 4. Enable systemd unit so stack survives reboot
+echo "Enabling systemd..."
 sudo cp systemd/pi_cam_service.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable pi_cam_service.service
