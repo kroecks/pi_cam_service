@@ -6,7 +6,7 @@ echo "🚀 Starting Pi Camera Service setup..."
 # 1. System prep
 echo "📦 Updating system packages..."
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git libcamera-apps ffmpeg v4l-utils python3-pip python3-venv python3-full libcap-dev
+sudo apt install -y git libcamera-apps ffmpeg v4l-utils python3-pip python3-venv python3-full libcap-dev python3-picamera2 python3-libcamera libcamera-dev
 
 # 2. Camera setup
 echo "📹 Configuring camera..."
@@ -40,18 +40,54 @@ else
     cd pi_cam_service
 fi
 
-# 5. Setup Python virtual environment
+# 5. Setup Python virtual environment (FIXED)
 echo "🐍 Setting up Python environment..."
-if [ ! -d "venv" ]; then
-    python3 -m venv venv
+if [ -d "venv" ]; then
+    echo "Removing existing venv..."
+    rm -rf venv
 fi
+
+# Create fresh virtual environment
+python3 -m venv venv
 source venv/bin/activate
+
+# Upgrade pip inside venv
 pip install --upgrade pip
+
+# Install requirements inside venv
+echo "📦 Installing Python packages in virtual environment..."
 pip install -r app/requirements.txt
+
+# Deactivate venv
 deactivate
 
-# 6. Create MediaMTX config and start with Docker
-echo "🎥 Setting up MediaMTX config..."
+# 6. Create docker-compose.yml for MediaMTX
+echo "🎥 Setting up MediaMTX Docker Compose..."
+cat > docker-compose.yml << 'EOF'
+version: '3.8'
+
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: mediamtx
+    ports:
+      - "8554:8554"     # RTSP
+      - "1935:1935"     # RTMP
+      - "8888:8888"     # HLS
+      - "8889:8889"     # WebRTC
+      - "8890:8890"     # SRT
+      - "9997:9997"     # API
+      - "9998:9998"     # Metrics
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml
+      - ./recordings:/recordings
+    restart: unless-stopped
+    environment:
+      - MTX_PROTOCOLS=tcp
+EOF
+
+# 7. Create MediaMTX config
+echo "🎥 Creating MediaMTX config..."
 cat > mediamtx.yml << 'EOF'
 # MediaMTX configuration for Pi Camera Service
 
@@ -167,12 +203,13 @@ EOF
 echo "🎥 Starting MediaMTX..."
 docker compose up -d mediamtx
 
-# 7. Setup systemd service for FastAPI
+# 8. Setup systemd service for FastAPI
 echo "🔧 Setting up systemd service..."
 cat > /tmp/pi_cam_service.service << EOF
 [Unit]
 Description=Pi Camera RTSP Service
-After=network.target
+After=network.target docker.service
+Requires=docker.service
 
 [Service]
 Type=simple
@@ -191,7 +228,7 @@ sudo mv /tmp/pi_cam_service.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable pi_cam_service.service
 
-# 8. Test camera devices
+# 9. Test camera devices
 echo "🔍 Checking camera devices..."
 for i in {0..1}; do
     if [ -e "/dev/video$i" ]; then
@@ -205,6 +242,18 @@ for i in {0..1}; do
         echo "❌ Camera device /dev/video$i not found"
     fi
 done
+
+# 10. Check if Pi Camera is detected
+echo "🔍 Checking Pi Camera (libcamera)..."
+if libcamera-hello --list-cameras > /dev/null 2>&1; then
+    echo "✅ Pi Camera detected via libcamera"
+    libcamera-hello --list-cameras
+else
+    echo "❌ Pi Camera not detected via libcamera"
+fi
+
+# 11. Create recordings directory
+mkdir -p recordings
 
 echo ""
 echo "🎉 Setup complete!"
@@ -222,3 +271,8 @@ echo "- MediaMTX: http://localhost:9997"
 echo "- HLS streams: http://localhost:8888"
 echo ""
 echo "⚠️  A reboot is recommended so camera and group changes take effect."
+echo ""
+echo "🔧 To manually test the virtual environment:"
+echo "cd /opt/pi_cam_service"
+echo "source venv/bin/activate"
+echo "python -c 'import picamera2; print(\"Picamera2 imported successfully\")'"
