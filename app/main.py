@@ -21,14 +21,14 @@ def cameras():
     logger.info("Listing cameras: %s", cams)
     return cams
 
-@app.post("/api/stream/{camera_id}/start")
+@app.post("/api/stream/{camera_id:path}/start")
 def start(camera_id: str = Path(...)):
     camera_id = urllib.parse.unquote(camera_id)
     if not stream.start(camera_id):
         raise HTTPException(404, "camera not found or already streaming")
     return {"status": "started", "camera": camera_id}
 
-@app.post("/api/stream/{camera_id}/stop")
+@app.post("/api/stream/{camera_id:path}/stop")
 def stop(camera_id: str = Path(...)):
     camera_id = urllib.parse.unquote(camera_id)
     if not stream.stop(camera_id):
