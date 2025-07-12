@@ -8,6 +8,7 @@ services:
     devices:
       - "/dev/video0:/dev/video0"
       - "/dev/video1:/dev/video1"
+      - "/dev/vchiq:/dev/vchiq"
 
     environment:
       - PYTHONUNBUFFERED=1

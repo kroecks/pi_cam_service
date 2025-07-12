@@ -48,7 +48,7 @@ if [ -d "venv" ]; then
 fi
 
 # Create fresh virtual environment
-python3 -m venv venv
+python3 -m venv --system-side-packages venv
 source venv/bin/activate
 
 # Upgrade pip inside venv

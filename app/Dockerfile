@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-opencv \
         ffmpeg \
         v4l-utils \
+        python3-libcamera \
+        python3-picamera2 \
         libcamera-apps \
         libcamera-dev \
         build-essential \
