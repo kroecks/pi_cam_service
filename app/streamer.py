@@ -1,4 +1,5 @@
 import subprocess, shlex, signal
+import os
 
 _MEDIAMTX_PORT = 8554  # rtsp://<pi>:8554/cam0 etc.
 _BASE_PIPELINE = (
