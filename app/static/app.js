@@ -18,8 +18,8 @@ async function refresh() {
       btn.className = 'button is-light';
       btn.innerText = cam.name;
       btn.onclick = () => {
-        const encodedId = encodeURIComponent(cam.id);
-        window.console.log(`Encoding id=${cam.id} to encoded=${encodedId}`);
+        const safeId = cam.id.startsWith('/') ? cam.id.slice(1) : cam.id;
+        const encodedId = encodeURIComponent(safeId);
         fetch(`/api/stream/${encodedId}/start`, { method: 'POST' });
       };
       wrap.appendChild(btn);
