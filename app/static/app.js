@@ -17,7 +17,10 @@ async function refresh() {
       const btn = document.createElement('button');
       btn.className = 'button is-light';
       btn.innerText = cam.name;
-      btn.onclick = () => fetch(`/api/stream/${encodeURIComponent(cam.id)}/start`, { method: 'POST' });
+      btn.onclick = () => {
+        const encodedId = encodeURIComponent(cam.id);
+        fetch(`/api/stream/${encodedId}/start`, { method: 'POST' });
+      };
       wrap.appendChild(btn);
     });
   } catch (err) {
