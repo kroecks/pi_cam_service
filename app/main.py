@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Path
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import logging
+import urllib.parse
 
 from camera import list_cameras
 from streamer import StreamManager
@@ -21,13 +22,15 @@ def cameras():
     return cams
 
 @app.post("/api/stream/{camera_id}/start")
-def start(camera_id: str):
+def start(camera_id: str = Path(...)):
+    camera_id = urllib.parse.unquote(camera_id)
     if not stream.start(camera_id):
         raise HTTPException(404, "camera not found or already streaming")
     return {"status": "started", "camera": camera_id}
 
 @app.post("/api/stream/{camera_id}/stop")
-def stop(camera_id: str):
+def stop(camera_id: str = Path(...)):
+    camera_id = urllib.parse.unquote(camera_id)
     if not stream.stop(camera_id):
         raise HTTPException(404, "camera not active")
     return {"status": "stopped", "camera": camera_id}
