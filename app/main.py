@@ -1,18 +1,24 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import logging
+
 from camera import list_cameras
 from streamer import StreamManager
 
-app = FastAPI(title="Pi RTSP Camera Service")
-# serve the SPA (index.html) from / – tweak path if relocating static/
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("pi_cam_service")
+
+app = FastAPI(title="Pi Camera Service")
 
 stream = StreamManager()
 
+# ---------- API ----------
 @app.get("/api/cameras")
 def cameras():
-    """Return all /dev/video* devices (USB or CSI as v4l2loopback)."""
-    return list_cameras()
+    cams = list_cameras()
+    logger.info("Listing cameras: %s", cams)
+    return cams
 
 @app.post("/api/stream/{camera_id}/start")
 def start(camera_id: str):
@@ -25,3 +31,10 @@ def stop(camera_id: str):
     if not stream.stop(camera_id):
         raise HTTPException(404, "camera not active")
     return {"status": "stopped", "camera": camera_id}
+
+# ---------- Front‑end ----------
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+def index():
+    return FileResponse("static/index.html")
