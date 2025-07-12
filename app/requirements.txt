@@ -1,10 +1,5 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-# Use system picamera2 instead of pip version
-# picamera2==0.3.12
-numpy==1.24.3
-# OpenCV might conflict with system packages, use cv2-python instead or system package
-# opencv-python==4.8.1.78
-python-multipart==0.0.6
-psutil==5.9.6
-pydantic==2.5.0
+fastapi
+uvicorn
+picamera2
+numpy
+opencv-python
