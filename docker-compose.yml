@@ -1,14 +1,10 @@
 version: "3.9"
 services:
   api:
-    image: python:3.11-slim
-    volumes:
-      - ./app:/app
-    working_dir: /app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    build: ./app
     devices:
       - "/dev/video0:/dev/video0"
-      - "/dev/video1:/dev/video1"  # add more as needed
+      - "/dev/video1:/dev/video1"
     network_mode: host
     restart: unless-stopped
 
