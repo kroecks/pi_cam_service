@@ -19,6 +19,7 @@ async function refresh() {
       btn.innerText = cam.name;
       btn.onclick = () => {
         const encodedId = encodeURIComponent(cam.id);
+        window.console.log(`Encoding id=${cam.id} to encoded=${encodedId}`);
         fetch(`/api/stream/${encodedId}/start`, { method: 'POST' });
       };
       wrap.appendChild(btn);
