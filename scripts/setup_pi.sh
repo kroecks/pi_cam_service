@@ -14,23 +14,25 @@ if ! command -v docker compose &>/dev/null; then
   sudo apt install -y docker-compose-plugin
 fi
 
-# 3. Clone repo under /opt and bring it up
+# 3. Clone or pull latest repo into /opt
 sudo mkdir -p /opt && sudo chown "$USER" /opt
 cd /opt
-if [ ! -d pi_cam_service ]; then
+if [ -d pi_cam_service/.git ]; then
+  echo "Updating existing repo…"
+  cd pi_cam_service && git pull
+else
   git clone https://github.com/kroecks/pi_cam_service.git
+  cd pi_cam_service
 fi
-cd pi_cam_service
 
-echo "Begin pull..."
+# 4. Build & start stack
+echo "Building container images…"
+docker compose build
 
-docker compose pull
-
-echo "Begin Docker compose..."
+echo "Starting stack…"
 docker compose up -d
 
-# 4. Enable systemd unit so stack survives reboot
-echo "Enabling systemd..."
+# 5. Enable systemd
 sudo cp systemd/pi_cam_service.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable pi_cam_service.service
