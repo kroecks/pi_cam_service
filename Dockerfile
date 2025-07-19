@@ -1,13 +1,14 @@
-FROM python:3.9-slim
+FROM python:3.11-slim-bookworm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libcamera-dev \
-    libcamera-apps \
-    python3-picamera2 \
-    python3-libcamera \
     ffmpeg \
     v4l-utils \
+    libv4l-dev \
+    python3-opencv \
+    python3-dev \
+    gcc \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -22,6 +23,10 @@ COPY config/ ./config/
 
 # Create logs directory
 RUN mkdir -p logs
+
+# Create non-root user
+RUN useradd -m -u 1000 apiuser && chown -R apiuser:apiuser /app
+USER apiuser
 
 EXPOSE 8000
 

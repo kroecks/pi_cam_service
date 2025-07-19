@@ -8,11 +8,13 @@ services:
       - "8554:8554"  # RTSP
       - "8889:8889"  # Web interface
       - "8890:8890"  # WebRTC
+      - "9997:9997"  # API
     volumes:
       - ./config/mediamtx.yml:/mediamtx.yml
       - ./logs:/logs
     restart: unless-stopped
-    privileged: true
+    networks:
+      - camera-net
 
   camera-api:
     build: .
@@ -26,6 +28,7 @@ services:
     environment:
       - MEDIAMTX_HOST=mediamtx
       - MEDIAMTX_PORT=8554
+      - MEDIAMTX_API_PORT=9997
       - API_HOST=0.0.0.0
       - API_PORT=8000
     depends_on:
@@ -35,5 +38,13 @@ services:
     devices:
       - /dev/video0:/dev/video0
       - /dev/video1:/dev/video1
-    cap_add:
-      - SYS_ADMIN
+      - /dev/video2:/dev/video2
+      - /dev/video3:/dev/video3
+    group_add:
+      - video
+    networks:
+      - camera-net
+
+networks:
+  camera-net:
+    driver: bridge
