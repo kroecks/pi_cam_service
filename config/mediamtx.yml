@@ -26,7 +26,7 @@ webuiAddress: 0.0.0.0:8889
 # Path defaults
 pathDefaults:
   source: publisher
-  runOnDemand: no
+  runOnDemand: false
   runOnDemandStartTimeout: 10s
   runOnDemandCloseAfter: 10s
 
