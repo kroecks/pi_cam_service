@@ -26,7 +26,6 @@ webrtcAddress: 0.0.0.0:8890
 # Path defaults
 pathDefaults:
   source: publisher
-  runOnDemand: "no"
   runOnDemandStartTimeout: 10s
   runOnDemandCloseAfter: 10s
 
