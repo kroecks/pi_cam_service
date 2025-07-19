@@ -58,6 +58,7 @@ async def get_cameras():
     """Get list of available cameras"""
     try:
         cameras = await camera_manager.get_available_cameras()
+        logger.info(f"Found cameras: {cameras}")
         return cameras
     except Exception as e:
         logger.error(f"Error getting cameras: {e}")
