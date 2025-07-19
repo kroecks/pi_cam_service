@@ -1,35 +1,39 @@
+version: '3.8'
+
 services:
-  pi-camera-api:
-    build:
-      context: ./app
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    devices:
-      - "/dev/video0:/dev/video0"
-      - "/dev/video1:/dev/video1"
-      - "/dev/vchiq:/dev/vchiq"
-
-    environment:
-      - PYTHONUNBUFFERED=1
-    privileged: true
-    restart: unless-stopped
-    networks:
-      - camera-network
-
   mediamtx:
     image: bluenviron/mediamtx:latest
+    container_name: mediamtx
     ports:
       - "8554:8554"  # RTSP
-      - "1935:1935"  # RTMP
-      - "8888:8888"  # HLS
-      - "9997:9997"  # Web UI
+      - "8889:8889"  # Web interface
+      - "8890:8890"  # WebRTC
     volumes:
-      - ./mediamtx.yml:/mediamtx.yml
+      - ./config/mediamtx.yml:/mediamtx.yml
+      - ./logs:/logs
     restart: unless-stopped
-    networks:
-      - camera-network
+    privileged: true
 
-networks:
-  camera-network:
-    driver: bridge
+  camera-api:
+    build: .
+    container_name: camera-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - /dev:/dev
+      - ./config:/app/config
+      - ./logs:/app/logs
+    environment:
+      - MEDIAMTX_HOST=mediamtx
+      - MEDIAMTX_PORT=8554
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    depends_on:
+      - mediamtx
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/video0:/dev/video0
+      - /dev/video1:/dev/video1
+    cap_add:
+      - SYS_ADMIN

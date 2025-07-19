@@ -1,0 +1,37 @@
+# MediaMTX configuration
+logLevel: info
+logDestinations: [stdout]
+logFile: /logs/mediamtx.log
+
+# API configuration
+api: yes
+apiAddress: 0.0.0.0:9997
+
+# Metrics
+metrics: yes
+metricsAddress: 0.0.0.0:9998
+
+# RTSP server
+rtspAddress: 0.0.0.0:8554
+rtspServerKey: server.key
+rtspServerCert: server.crt
+
+# WebRTC server
+webrtcAddress: 0.0.0.0:8890
+
+# Web interface
+webui: yes
+webuiAddress: 0.0.0.0:8889
+
+# Path defaults
+pathDefaults:
+  source: publisher
+  runOnDemand: no
+  runOnDemandStartTimeout: 10s
+  runOnDemandCloseAfter: 10s
+
+# Enable authentication if needed
+# authMethods: [basic]
+# authInternalUsers:
+#   - user: admin
+#     pass: password
