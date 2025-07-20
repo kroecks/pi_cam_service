@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from .camera_manager import CameraManager
 from .stream_manager import StreamManager
 from .models import CameraInfo, StreamStatus, StreamRequest
+from picamera2 import Picamera2
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -58,7 +59,8 @@ async def get_cameras():
     """Get list of available cameras"""
     try:
         cameras = await camera_manager.get_available_cameras()
-        logger.info(f"Found cameras: {cameras}")
+        others = Picamera2.global_camera_info()
+        logger.info(f"Found cameras: {cameras} and others: {others}")
         return cameras
     except Exception as e:
         logger.error(f"Error getting cameras: {e}")
