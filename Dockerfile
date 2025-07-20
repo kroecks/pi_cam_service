@@ -1,4 +1,4 @@
-FROM raspbian/bookworm:latest
+FROM docker.io/raspberrypi/python:3.11-bookworm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
