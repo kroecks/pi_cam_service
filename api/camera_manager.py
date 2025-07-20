@@ -142,9 +142,13 @@ class CameraManager:
         """Detect libcamera devices (Raspberry Pi cameras)"""
         cameras = []
         try:
-            result = subprocess.run([
-                '/usr/bin/libcamera-hello', '--list-cameras'
-            ], capture_output=True, text=True, timeout=10)
+            result = subprocess.run(
+                ['libcamera-hello', '--list-cameras'],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                env={**os.environ, 'PATH': '/usr/bin:/usr/local/bin:' + os.environ.get('PATH', '')}
+            )
 
             if result.returncode == 0:
                 output = result.stdout
