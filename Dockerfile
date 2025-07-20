@@ -29,7 +29,7 @@ WORKDIR /app
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --break-system-packages --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY api/ ./api/
@@ -44,4 +44,4 @@ USER apiuser
 
 EXPOSE 8000
 
-CMD ["python", "-m", "api.main"]
+CMD ["python3", "-m", "api.main"]
