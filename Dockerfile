@@ -1,4 +1,4 @@
-FROM balenalib/rpi-raspbian:bookworm
+FROM --platform=linux/arm/v7 balenalib/raspberry-pi-debian:bookworm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
