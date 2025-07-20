@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  picamera2:
+    build: .
+    stdin_open: true
+    tty: true
+    container_name: picamera2
+    volumes:
+      - ./code:/code
+      - /run/udev/:/run/udev:ro
+    devices:
+      - /dev/video0:/dev/video0
+    command: bash
+    privileged: true
   mediamtx:
     image: bluenviron/mediamtx:latest
     container_name: mediamtx
