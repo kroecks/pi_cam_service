@@ -1,4 +1,11 @@
+# Use the official Raspberry Pi OS base image
 FROM --platform=linux/arm/v7 balenalib/raspberry-pi-debian:bookworm
+
+# Add Raspberry Pi repository for camera packages
+RUN echo "deb http://archive.raspberrypi.org/debian/ bookworm main" >> /etc/apt/sources.list.d/raspi.list && \
+    apt-get update --allow-unauthenticated && \
+    apt-get install -y --allow-unauthenticated raspberrypi-archive-keyring && \
+    apt-get update
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -6,18 +13,22 @@ RUN apt-get update && apt-get install -y \
     v4l-utils \
     libv4l-dev \
     python3-opencv \
-    libcamera-apps \
-    python3-picamera2 \
     python3-dev \
+    python3-pip \
     gcc \
     pkg-config \
+    libcamera-dev \
+    libcamera-tools \
     && rm -rf /var/lib/apt/lists/*
+
+# Install picamera2 via pip instead of apt
+RUN pip3 install --no-cache-dir picamera2
 
 WORKDIR /app
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY api/ ./api/
@@ -32,4 +43,4 @@ USER apiuser
 
 EXPOSE 8000
 
-CMD ["python", "-m", "api.main"]
+CMD ["python3", "-m", "api.main"]
