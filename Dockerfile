@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
     v4l-utils \
     libv4l-dev \
     python3-opencv \
+    libcamera-apps \
+    python3-picamera2 \
     python3-dev \
     gcc \
     pkg-config \
