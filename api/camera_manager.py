@@ -143,7 +143,7 @@ class CameraManager:
         cameras = []
         try:
             result = subprocess.run([
-                'libcamera-hello', '--list-cameras'
+                '/usr/bin/libcamera-hello', '--list-cameras'
             ], capture_output=True, text=True, timeout=10)
 
             if result.returncode == 0:
